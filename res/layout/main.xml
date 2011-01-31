@@ -5,6 +5,7 @@
     android:layout_height="fill_parent"
     >
     <eu.masconsult.android.androsnow.SnowView
+    			android:id="@+id/snowView"
 				android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
     />

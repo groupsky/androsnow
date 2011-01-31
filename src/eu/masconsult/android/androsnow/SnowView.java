@@ -18,47 +18,50 @@ public class SnowView extends View {
 
 	private Bitmap bitmap;
 
-    /**
-     * Everyone needs a little randomness in their life
-     */
-    private static final Random RNG = new Random();
-    
-    /**
-     * Create a simple handler that we can use to cause animation to happen.  We
-     * set ourselves as a target and we can use the sleep()
-     * function to cause an update/invalidate to occur at a later date.
-     */
-    private RefreshHandler mRedrawHandler = new RefreshHandler();
-    
-    private ArrayList<Coordinate> snowFlakes = new ArrayList<Coordinate>(100);
+	/**
+	 * Everyone needs a little randomness in their life
+	 */
+	private static final Random RNG = new Random();
 
-    class RefreshHandler extends Handler {
+	/**
+	 * Create a simple handler that we can use to cause animation to happen. We
+	 * set ourselves as a target and we can use the sleep() function to cause an
+	 * update/invalidate to occur at a later date.
+	 */
+	private RefreshHandler mRedrawHandler = new RefreshHandler();
 
-        @Override
-        public void handleMessage(Message msg) {
-            SnowView.this.update();
-            SnowView.this.invalidate();
-        }
+	private ArrayList<Coordinate> snowFlakes = new ArrayList<Coordinate>(100);
 
-        public void sleep(long delayMillis) {
-        	this.removeMessages(0);
-            sendMessageDelayed(obtainMessage(0), delayMillis);
-        }
-    };
-	
+	class RefreshHandler extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			SnowView.this.update();
+			SnowView.this.invalidate();
+		}
+
+		public void sleep(long delayMillis) {
+			this.removeMessages(0);
+			sendMessageDelayed(obtainMessage(0), delayMillis);
+		}
+	};
+
 	public SnowView(Context context) {
 		super(context);
 	}
-	
+
 	public void update() {
 		snowFlakes.add(new Coordinate(RNG.nextInt(getWidth()), -1));
-		int i=0;
+		int i = 0;
 		while (i < snowFlakes.size()) {
 			final Coordinate flake = snowFlakes.get(i);
-			int diff = RNG.nextInt(3)-1;
-			if (flake.x+diff < 0) diff = 0;
-			if (flake.x+diff >= getWidth()) diff = 0;
-			if (flake.y+1 >= getHeight() || bitmap.getPixel(flake.x+diff, flake.y+1) == Color.WHITE) {
+			int diff = RNG.nextInt(3) - 1;
+			if (flake.x + diff < 0)
+				diff = 0;
+			if (flake.x + diff >= getWidth())
+				diff = 0;
+			if (flake.y + 1 >= getHeight()
+					|| bitmap.getPixel(flake.x + diff, flake.y + 1) == Color.WHITE) {
 				snowFlakes.remove(i);
 				continue;
 			}
@@ -69,57 +72,66 @@ public class SnowView extends View {
 			bitmap.setPixel(flake.x, flake.y, Color.WHITE);
 			i++;
 		}
-		mRedrawHandler.sleep(10);
+
+		if (mRedrawHandler != null)
+			mRedrawHandler.sleep(10);
 	}
 
 	public SnowView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
-	
+
 	public SnowView(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 	}
-	
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		bitmap = Bitmap.createBitmap(getWidth(), getHeight(), Config.ARGB_4444);
 		bitmap.eraseColor(Color.BLACK);
 		update();
-    }
+	}
 
-	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		Paint paint = new Paint();
-		canvas.drawBitmap(bitmap, 0, 0, paint );
+		canvas.drawBitmap(bitmap, 0, 0, paint);
 	}
 
-    /**
-     * Simple class containing two integer values and a comparison function.
-     * There's probably something I should use instead, but this was quick and
-     * easy to build.
-     * 
-     */
-    private class Coordinate {
-        public int x;
-        public int y;
+	public void stopHandler() {
+		mRedrawHandler = null;
+	}
 
-        public Coordinate(int newX, int newY) {
-            x = newX;
-            y = newY;
-        }
+	public void startHandler() {
+		mRedrawHandler = new RefreshHandler();
+	}
 
-        public boolean equals(Coordinate other) {
-            if (x == other.x && y == other.y) {
-                return true;
-            }
-            return false;
-        }
+	/**
+	 * Simple class containing two integer values and a comparison function.
+	 * There's probably something I should use instead, but this was quick and
+	 * easy to build.
+	 * 
+	 */
+	private class Coordinate {
+		public int x;
+		public int y;
 
-        @Override
-        public String toString() {
-            return "Coordinate: [" + x + "," + y + "]";
-        }
-    }
+		public Coordinate(int newX, int newY) {
+			x = newX;
+			y = newY;
+		}
+
+		public boolean equals(Coordinate other) {
+			if (x == other.x && y == other.y) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public String toString() {
+			return "Coordinate: [" + x + "," + y + "]";
+		}
+	}
 }
